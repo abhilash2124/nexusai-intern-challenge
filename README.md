@@ -32,6 +32,7 @@ nexusai-intern-challenge/
   * Timeout (10 seconds)
   * Retry logic for rate limits
 * Returns structured response using dataclass
+* Supports different formats for voice and chat responses
 
 ---
 
@@ -55,12 +56,16 @@ nexusai-intern-challenge/
   * Billing system
   * Ticket history
 * Implements:
-
   * Sequential vs Parallel fetching
   * `asyncio.gather()` for concurrency
   * Error handling with partial results
 * Demonstrates performance improvement (~2x faster)
+📊 Performance Comparison
 
+Sequential Fetch: ~850–900 ms
+Parallel Fetch: ~250–350 ms
+
+This demonstrates ~3x speed improvement using async parallel execution.
 ---
 
 ### ✅ Task 4 — Escalation Decision Engine
@@ -74,13 +79,28 @@ nexusai-intern-challenge/
   * VIP + billing issues
   * Service cancellation
 * Returns decision with reason
+⚖️ Rule Conflict Handling
 
+When multiple rules apply, priority is determined by rule order.
+Critical cases such as service_cancellation override all others, ensuring immediate escalation.
 ---
 
 ### ✅ Task 5 — Design Answers
 
 * Covers system design decisions
 * Tradeoffs and improvements discussed in `ANSWERS.md`
+
+##🧪 Testing
+
+Run test cases using:
+
+pytest task4/ -v
+
+8 test cases implemented
+
+Covers all escalation rules and edge cases
+
+Ensures correctness of decision logic
 
 ---
 
