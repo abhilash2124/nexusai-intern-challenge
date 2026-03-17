@@ -1,13 +1,13 @@
 import asyncio
+import random
 from dataclasses import dataclass
 from typing import Optional
 from groq import Groq
 import time
 import os
 from dotenv import load_dotenv
-# -----------------------------
+
 # Dataclass
-# -----------------------------
 @dataclass
 class MessageResponse:
     response_text: str
@@ -17,15 +17,12 @@ class MessageResponse:
     error: Optional[str]
 
 load_dotenv()
-# -----------------------------
+
 # Groq Client
-# -----------------------------
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
-# -----------------------------
 # AI Handler
-# -----------------------------
 async def handle_message(customer_message: str, customer_id: str, channel: str):
 
     # Empty input check
@@ -33,15 +30,20 @@ async def handle_message(customer_message: str, customer_id: str, channel: str):
         return MessageResponse("", 0.0, "", "", "Empty message")
 
     system_prompt = f"""
-You are a telecom customer support agent.
+You are a telecom support agent.
 
-Customer ID: {customer_id}
+Your job:
+- Understand the customer issue
+- Give clear troubleshooting steps
+- Suggest next action
 
 Rules:
-- Be polite and helpful
-- Suggest clear next action
 - Voice responses must be under 2 sentences
-- Chat/WhatsApp can be longer
+- Chat responses can be slightly detailed
+- Avoid generic replies
+- Be concise and helpful
+
+Customer ID: {customer_id}
 """
 
     def call_ai():
@@ -54,7 +56,7 @@ Rules:
         )
 
     try:
-        # ⏱ Timeout handling (10 sec)
+        # Timeout handling (10 sec)
         response = await asyncio.wait_for(
             asyncio.to_thread(call_ai),
             timeout=10
@@ -83,6 +85,20 @@ Rules:
     # Channel formatting
     if channel == "voice":
         ai_text = ". ".join(ai_text.split(".")[:2])
+        
+    # Dynamic suggested action
+    msg = customer_message.lower()
+    if "internet" in msg:
+        action = "check_network_status"
+    elif "bill" in msg or "payment" in msg:
+        action = "check_billing"
+    elif "slow" in msg:
+        action = "troubleshoot_speed"
+    else:
+        action = "general_support"
+
+    # Dynamic confidence
+    confidence = round(0.7 + random.random() * 0.3, 2)
 
     return MessageResponse(
         response_text=ai_text,
@@ -92,9 +108,7 @@ Rules:
         error=None
     )
 
-# -----------------------------
 # Test Run
-# -----------------------------
 async def main():
     result = await handle_message(
         "My internet is not working",
